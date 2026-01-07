@@ -261,7 +261,7 @@ export default function ZenChat() {
           value={input}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder=""
+          placeholder="Hey, come say hi"
           disabled={isLoading}
           autoFocus
           className={cn(
