@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, KeyboardEvent, ChangeEvent, useEffect } from "react";
+import { useState, useRef, KeyboardEvent, ChangeEvent } from "react";
 import { cn } from "@/lib/utils";
 import { StreamingText } from "@/components/streaming-text";
 
@@ -86,14 +86,6 @@ export default function ZenChat() {
   const inputRef = useRef<HTMLInputElement>(null);
   const aiRequestTimestamps = useRef<number[]>([]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPlaceholderIndex(prev => (prev + 1) % PLACEHOLDERS.length);
-    }, 3000);
-    
-    return () => clearInterval(interval);
-  }, []);
-
   const checkRateLimit = (): boolean => {
     const now = Date.now();
     aiRequestTimestamps.current = aiRequestTimestamps.current.filter(
@@ -149,6 +141,7 @@ export default function ZenChat() {
       setHistory([...newHistory, { role: "assistant", content: presetResponse }]);
       setQuestionCount((c) => c + 1);
       setIsLoading(false);
+      setPlaceholderIndex(prev => (prev + 1) % PLACEHOLDERS.length);
       inputRef.current?.focus();
       return;
     }
@@ -158,6 +151,7 @@ export default function ZenChat() {
       setHistory([...newHistory, { role: "assistant", content: RATE_LIMIT_MESSAGE }]);
       setQuestionCount((c) => c + 1);
       setIsLoading(false);
+      setPlaceholderIndex(prev => (prev + 1) % PLACEHOLDERS.length);
       inputRef.current?.focus();
       return;
     }
@@ -216,6 +210,7 @@ export default function ZenChat() {
       
       setHistory([...newHistory, { role: "assistant", content: cleanedResponse }]);
       setQuestionCount((c) => c + 1);
+      setPlaceholderIndex(prev => (prev + 1) % PLACEHOLDERS.length);
     } catch (error) {
       console.error("Chat error:", error);
       setLastAnswer("hmm, something went wrong. try again?");
