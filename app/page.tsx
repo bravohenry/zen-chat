@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, KeyboardEvent, ChangeEvent } from "react";
+import { useState, useRef, KeyboardEvent, ChangeEvent, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { StreamingText } from "@/components/streaming-text";
 
@@ -67,6 +67,13 @@ function getSuggestions(lastAnswer: string, questionCount: number): string[] {
   return FOLLOW_UP_SUGGESTIONS.default;
 }
 
+const PLACEHOLDERS = [
+  "yo, what's on your mind?",
+  "ask me anything...",
+  "what's on your mind?",
+  "tell me what you're thinking",
+];
+
 export default function ZenChat() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -75,8 +82,17 @@ export default function ZenChat() {
   const [history, setHistory] = useState<Message[]>([]);
   const [questionCount, setQuestionCount] = useState(0);
   const [isIntense, setIsIntense] = useState(false);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const aiRequestTimestamps = useRef<number[]>([]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex(prev => (prev + 1) % PLACEHOLDERS.length);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const checkRateLimit = (): boolean => {
     const now = Date.now();
@@ -261,7 +277,7 @@ export default function ZenChat() {
           value={input}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Hey, come say hi"
+          placeholder={PLACEHOLDERS[placeholderIndex]}
           disabled={isLoading}
           autoFocus
           className={cn(
