@@ -1,4 +1,4 @@
-import { google } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
 export const runtime = "edge";
@@ -62,16 +62,42 @@ you: "!!!! yo chill. what's your problem?"
 </examples>
 `;
 
+const openrouter = createOpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY || "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",
+});
+
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  try {
+    const { messages } = await req.json();
 
-  const systemPrompt = process.env.SYSTEM_PROMPT || ZIHAN_PERSONA;
+    if (!messages || messages.length === 0) {
+      return new Response("No messages provided", { status: 400 });
+    }
 
-  const result = streamText({
-    model: google(process.env.GEMINI_MODEL || "gemini-2.5-flash"),
-    system: systemPrompt,
-    messages,
-  });
+    console.log("Chat API received:", messages.length, "messages");
+    console.log("Messages:", JSON.stringify(messages, null, 2));
+    
+    const systemPrompt = process.env.SYSTEM_PROMPT || ZIHAN_PERSONA;
 
-  return result.toTextStreamResponse();
+    const result = streamText({
+      model: openrouter(process.env.OPENROUTER_MODEL || "google/gemma-3-27b-it:free"),
+      system: systemPrompt,
+      messages,
+    });
+
+    const response = result.toTextStreamResponse();
+    
+    console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+    console.log("Response body readable:", response.body !== null);
+    
+    return response;
+  } catch (error) {
+    console.error("Chat API error:", error);
+    console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
+    return new Response(
+      JSON.stringify({ error: "Internal server error", details: String(error) }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
 }

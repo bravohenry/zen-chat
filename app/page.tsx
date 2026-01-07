@@ -2,6 +2,7 @@
 
 import { useState, useRef, KeyboardEvent, ChangeEvent } from "react";
 import { cn } from "@/lib/utils";
+import { StreamingText } from "@/components/streaming-text";
 
 interface Message {
   role: "user" | "assistant";
@@ -20,6 +21,35 @@ const FOLLOW_UP_SUGGESTIONS: Record<string, string[]> = {
   blog: ["what is ai dlc?", "vibecoding?", "how do you define yourself?"],
   default: ["contact info", "what are you working on?", "recommend something"],
 };
+
+const PRESET_RESPONSES: Record<string, string> = {
+  "who are you?": "yo, i'm zihan. design engineer and ai builder based in the US. working on [biuty.ai](https://biuty.ai) and other things ✌️",
+  "what do you do?": "design + strategy + ai systems. currently building [biuty.ai](https://biuty.ai) as coo. before that samsung, avatr, grabarz.",
+  "show me your projects": "check [/works](/works) – samsung design research, olig agency, skya are some highlights. also built [zios](https://os.bravohenry.com), a playful web os.",
+  "your background?": "wenzhou china → germany → US. masters in design management. worked at samsung, avatr, grabarz & partner before going all-in on ai.",
+  "design philosophy?": "less but better. every detail matters. design should feel inevitable, not decorated.",
+  "see your works": "[/works](/works) has everything. samsung design principles, olig agency, skya, '01 ipod tribute, the kyeol.",
+  "tell me about samsung": "led design research there. worked on design principles and system thinking. still one of my proudest projects.",
+  "what is olig agency?": "ai-native branding agency i helped build. we use ai for the entire brand creation process – strategy to execution.",
+  "your blogs?": "i write about ai, design, and building things. ai dlc, vibecoding playbook, ux in ai era. all on [/blog](/blog)",
+  "what is ai dlc?": "my framework for thinking about ai as downloadable content for your brain. augmentation, not replacement.",
+  "vibecoding?": "coding by vibes. you describe what you want, ai writes the code. i wrote a whole playbook about it.",
+  "how do you define yourself?": "ai-native builder. i think in systems and ship in weeks. design background but code is my new medium.",
+  "contact info": "[x @bravohenry](https://x.com/bravohenry) or email [hi@z1han.com](mailto:hi@z1han.com). always down to chat about interesting projects.",
+  "what are you working on?": "[biuty.ai](https://biuty.ai) mainly. also experimenting with [zios](https://os.bravohenry.com) and some ai tools. always building something.",
+  "recommend something": "go read my vibecoding playbook on [/blog](/blog) if you want to ship faster. or just vibe on [zios](https://os.bravohenry.com) for fun.",
+};
+
+const RATE_LIMIT = {
+  maxRequests: 10,
+  windowMs: 2 * 60 * 1000,
+};
+
+const RATE_LIMIT_MESSAGE = "yo, you got a lot of questions! email me at [hi@z1han.com](mailto:hi@z1han.com) or dm on [x @bravohenry](https://x.com/bravohenry) ✌️";
+
+function stripMarkdownLinks(text: string): string {
+  return text.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+}
 
 function getSuggestions(lastAnswer: string, questionCount: number): string[] {
   if (questionCount === 0) return INITIAL_SUGGESTIONS;
@@ -46,6 +76,19 @@ export default function ZenChat() {
   const [questionCount, setQuestionCount] = useState(0);
   const [isIntense, setIsIntense] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const aiRequestTimestamps = useRef<number[]>([]);
+
+  const checkRateLimit = (): boolean => {
+    const now = Date.now();
+    aiRequestTimestamps.current = aiRequestTimestamps.current.filter(
+      ts => now - ts < RATE_LIMIT.windowMs
+    );
+    return aiRequestTimestamps.current.length >= RATE_LIMIT.maxRequests;
+  };
+
+  const recordAiRequest = () => {
+    aiRequestTimestamps.current.push(Date.now());
+  };
 
   const processResponse = (text: string): string => {
     if (text.startsWith("!!!!")) {
@@ -53,6 +96,17 @@ export default function ZenChat() {
       return text.slice(4).trimStart();
     }
     setIsIntense(false);
+    return text;
+  };
+
+  const simulateTyping = async (text: string) => {
+    const words = text.split(" ");
+    let accumulated = "";
+    for (const word of words) {
+      accumulated += (accumulated ? " " : "") + word;
+      setLastAnswer(accumulated);
+      await new Promise(r => setTimeout(r, 30 + Math.random() * 40));
+    }
     return text;
   };
 
@@ -67,28 +121,77 @@ export default function ZenChat() {
     setIsIntense(false);
 
     const newHistory: Message[] = [...history, { role: "user", content: messageToSend }];
+    
+    console.log("Current history length:", history.length);
+    console.log("New history:", newHistory.map(m => ({ role: m.role, content: m.content.slice(0, 30) })));
+
+    const presetKey = messageToSend.toLowerCase();
+    const presetResponse = PRESET_RESPONSES[presetKey];
+    
+    if (presetResponse) {
+      await simulateTyping(presetResponse);
+      setHistory([...newHistory, { role: "assistant", content: presetResponse }]);
+      setQuestionCount((c) => c + 1);
+      setIsLoading(false);
+      inputRef.current?.focus();
+      return;
+    }
+
+    if (checkRateLimit()) {
+      await simulateTyping(RATE_LIMIT_MESSAGE);
+      setHistory([...newHistory, { role: "assistant", content: RATE_LIMIT_MESSAGE }]);
+      setQuestionCount((c) => c + 1);
+      setIsLoading(false);
+      inputRef.current?.focus();
+      return;
+    }
+
+    recordAiRequest();
 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newHistory }),
+        body: JSON.stringify({ messages: [{ role: "user", content: messageToSend }] }),
       });
 
-      if (!response.ok) throw new Error("Failed to get response");
+      console.log("Response status:", response.status, response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API error response:", errorText);
+        throw new Error(`API error: ${response.status}`);
+      }
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let fullResponse = "";
+      let chunkCount = 0;
 
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
-          fullResponse += chunk;
-          setLastAnswer(processResponse(fullResponse));
+      if (!reader) {
+        console.error("No reader available");
+        throw new Error("No response body");
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          console.log("Stream done. Total chunks:", chunkCount);
+          break;
         }
+        const chunk = decoder.decode(value, { stream: true });
+        chunkCount++;
+        console.log("Chunk", chunkCount, "size:", value.byteLength, "chars:", chunk.length);
+        fullResponse += chunk;
+        setLastAnswer(processResponse(fullResponse));
+      }
+
+      console.log("Full response received:", fullResponse.length, "chars");
+      console.log("Response content:", JSON.stringify(fullResponse.slice(0, 100)));
+
+      if (!fullResponse.trim()) {
+        console.error("Empty response after", chunkCount, "chunks");
+        throw new Error("Empty response");
       }
 
       const cleanedResponse = fullResponse.startsWith("!!!!") 
@@ -97,8 +200,9 @@ export default function ZenChat() {
       
       setHistory([...newHistory, { role: "assistant", content: cleanedResponse }]);
       setQuestionCount((c) => c + 1);
-    } catch {
-      setLastAnswer("...");
+    } catch (error) {
+      console.error("Chat error:", error);
+      setLastAnswer("hmm, something went wrong. try again?");
     } finally {
       setIsLoading(false);
       inputRef.current?.focus();
@@ -144,14 +248,10 @@ export default function ZenChat() {
               <span className="h-1.5 w-1.5 rounded-full bg-foreground/40 animate-bounce" />
             </div>
           ) : (
-            <p 
-              className={cn(
-                "text-sm leading-relaxed whitespace-pre-wrap transition-colors duration-300",
-                isIntense && "text-red-600"
-              )}
-            >
-              {lastAnswer}
-            </p>
+            <StreamingText
+              text={lastAnswer}
+              isIntense={isIntense}
+            />
           )}
         </div>
 
