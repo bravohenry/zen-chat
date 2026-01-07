@@ -64,7 +64,7 @@ you: "!!!! yo chill. what's your problem?"
 
 const openrouter = createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY || "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",
+  apiKey: process.env.OPENROUTER_API_KEY,
 });
 
 export async function POST(req: Request) {
