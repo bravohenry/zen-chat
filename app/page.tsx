@@ -9,29 +9,29 @@ interface Message {
 }
 
 const INITIAL_SUGGESTIONS = [
-  "你是谁",
-  "What do you do?",
-  "Show me your projects",
+  "who are you?",
+  "what do you do?",
+  "show me your projects",
 ];
 
 const FOLLOW_UP_SUGGESTIONS: Record<string, string[]> = {
-  identity: ["你的背景是什么", "What's your design philosophy?", "看看你的作品"],
-  projects: ["Tell me about Samsung project", "What is OliG Agency?", "你的博客写什么"],
-  blog: ["AI DLC是什么", "Vibecoding是什么", "你怎么定义自己"],
-  default: ["联系方式", "你最近在做什么", "推荐我看什么"],
+  identity: ["your background?", "design philosophy?", "see your works"],
+  projects: ["tell me about samsung", "what is olig agency?", "your blogs?"],
+  blog: ["what is ai dlc?", "vibecoding?", "how do you define yourself?"],
+  default: ["contact info", "what are you working on?", "recommend something"],
 };
 
 function getSuggestions(lastAnswer: string, questionCount: number): string[] {
   if (questionCount === 0) return INITIAL_SUGGESTIONS;
   
   const lower = lastAnswer.toLowerCase();
-  if (lower.includes("samsung") || lower.includes("olig") || lower.includes("project") || lower.includes("作品")) {
+  if (lower.includes("samsung") || lower.includes("olig") || lower.includes("project") || lower.includes("works")) {
     return FOLLOW_UP_SUGGESTIONS.projects;
   }
-  if (lower.includes("blog") || lower.includes("wrote") || lower.includes("博客") || lower.includes("文章")) {
+  if (lower.includes("blog") || lower.includes("wrote") || lower.includes("article")) {
     return FOLLOW_UP_SUGGESTIONS.blog;
   }
-  if (lower.includes("zihan") || lower.includes("design") || lower.includes("设计") || lower.includes("我是")) {
+  if (lower.includes("zihan") || lower.includes("design") || lower.includes("i'm") || lower.includes("i am")) {
     return FOLLOW_UP_SUGGESTIONS.identity;
   }
   return FOLLOW_UP_SUGGESTIONS.default;
@@ -43,7 +43,17 @@ export default function ZenChat() {
   const [lastAnswer, setLastAnswer] = useState("");
   const [history, setHistory] = useState<Message[]>([]);
   const [questionCount, setQuestionCount] = useState(0);
+  const [isIntense, setIsIntense] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const processResponse = (text: string): string => {
+    if (text.startsWith("!!!!")) {
+      setIsIntense(true);
+      return text.slice(4).trimStart();
+    }
+    setIsIntense(false);
+    return text;
+  };
 
   const handleSubmit = async (customInput?: string) => {
     const messageToSend = customInput || input.trim();
@@ -52,6 +62,7 @@ export default function ZenChat() {
     setInput("");
     setLastAnswer("");
     setIsLoading(true);
+    setIsIntense(false);
 
     const newHistory: Message[] = [...history, { role: "user", content: messageToSend }];
 
@@ -74,11 +85,15 @@ export default function ZenChat() {
           if (done) break;
           const chunk = decoder.decode(value);
           fullResponse += chunk;
-          setLastAnswer(fullResponse);
+          setLastAnswer(processResponse(fullResponse));
         }
       }
 
-      setHistory([...newHistory, { role: "assistant", content: fullResponse }]);
+      const cleanedResponse = fullResponse.startsWith("!!!!") 
+        ? fullResponse.slice(4).trimStart() 
+        : fullResponse;
+      
+      setHistory([...newHistory, { role: "assistant", content: cleanedResponse }]);
       setQuestionCount((c) => c + 1);
     } catch {
       setLastAnswer("...");
@@ -102,7 +117,12 @@ export default function ZenChat() {
   const suggestions = getSuggestions(lastAnswer, questionCount);
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div 
+      className={cn(
+        "flex min-h-screen items-center justify-center p-4 transition-colors duration-500",
+        isIntense && "bg-red-500/10"
+      )}
+    >
       <div className="w-full max-w-md space-y-4">
         <div
           className={cn(
@@ -110,7 +130,12 @@ export default function ZenChat() {
             lastAnswer ? "max-h-[60vh] opacity-100 mb-4" : "max-h-0 opacity-0"
           )}
         >
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+          <p 
+            className={cn(
+              "text-sm leading-relaxed whitespace-pre-wrap transition-colors duration-300",
+              isIntense && "text-red-600"
+            )}
+          >
             {lastAnswer}
           </p>
         </div>
@@ -129,8 +154,9 @@ export default function ZenChat() {
             "placeholder:text-muted-foreground/30",
             "focus:outline-none",
             "disabled:opacity-30",
-            "transition-opacity duration-300",
-            "border-b border-foreground/10 focus:border-foreground/20"
+            "transition-all duration-300",
+            "border-b border-foreground/10 focus:border-foreground/20",
+            isIntense && "border-red-500/30"
           )}
         />
 
