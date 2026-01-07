@@ -40,6 +40,7 @@ function getSuggestions(lastAnswer: string, questionCount: number): string[] {
 export default function ZenChat() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState("");
   const [lastAnswer, setLastAnswer] = useState("");
   const [history, setHistory] = useState<Message[]>([]);
   const [questionCount, setQuestionCount] = useState(0);
@@ -60,6 +61,7 @@ export default function ZenChat() {
     if (!messageToSend || isLoading) return;
 
     setInput("");
+    setCurrentQuestion(messageToSend);
     setLastAnswer("");
     setIsLoading(true);
     setIsIntense(false);
@@ -115,6 +117,7 @@ export default function ZenChat() {
   };
 
   const suggestions = getSuggestions(lastAnswer, questionCount);
+  const showQuestion = currentQuestion && (isLoading || lastAnswer);
 
   return (
     <div 
@@ -127,17 +130,29 @@ export default function ZenChat() {
         <div
           className={cn(
             "overflow-hidden transition-all duration-500 ease-out",
-            lastAnswer ? "max-h-[60vh] opacity-100 mb-4" : "max-h-0 opacity-0"
+            showQuestion ? "max-h-[70vh] opacity-100" : "max-h-0 opacity-0"
           )}
         >
-          <p 
-            className={cn(
-              "text-sm leading-relaxed whitespace-pre-wrap transition-colors duration-300",
-              isIntense && "text-red-600"
-            )}
-          >
-            {lastAnswer}
+          <p className="text-xs text-foreground/40 mb-3 transition-all duration-300">
+            {currentQuestion}
           </p>
+          
+          {isLoading && !lastAnswer ? (
+            <div className="flex gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:-0.3s]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:-0.15s]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-foreground/40 animate-bounce" />
+            </div>
+          ) : (
+            <p 
+              className={cn(
+                "text-sm leading-relaxed whitespace-pre-wrap transition-colors duration-300",
+                isIntense && "text-red-600"
+              )}
+            >
+              {lastAnswer}
+            </p>
+          )}
         </div>
 
         <input
@@ -160,13 +175,7 @@ export default function ZenChat() {
           )}
         />
 
-        {isLoading ? (
-          <div className="flex gap-1 pt-2">
-            <span className="h-1 w-1 rounded-full bg-foreground/30 animate-pulse" />
-            <span className="h-1 w-1 rounded-full bg-foreground/30 animate-pulse [animation-delay:0.2s]" />
-            <span className="h-1 w-1 rounded-full bg-foreground/30 animate-pulse [animation-delay:0.4s]" />
-          </div>
-        ) : (
+        {!isLoading && (
           <div className="flex flex-wrap gap-2 pt-2">
             {suggestions.map((s) => (
               <button
