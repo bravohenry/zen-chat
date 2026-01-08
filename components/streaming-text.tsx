@@ -84,7 +84,7 @@ function parseMarkdown(text: string): TextSegment[] {
   const markdownSegments: Array<{ start: number; end: number; type: "boldItalic" | "bold" | "italic"; content: string }> = [];
 
   // Find bold-italic (***text***)
-  let match;
+  let match: RegExpExecArray | null;
   while ((match = BOLD_ITALIC_REGEX.exec(currentText)) !== null) {
     markdownSegments.push({
       start: match.index,
@@ -96,25 +96,27 @@ function parseMarkdown(text: string): TextSegment[] {
 
   // Find bold (**text**)
   while ((match = BOLD_REGEX.exec(currentText)) !== null) {
+    const boldMatch = match; // TypeScript guard
     // Check if it's not already part of bold-italic
     const isPartOfBoldItalic = markdownSegments.some(
-      seg => match.index >= seg.start && match.index < seg.end
+      seg => boldMatch.index >= seg.start && boldMatch.index < seg.end
     );
     if (!isPartOfBoldItalic) {
       markdownSegments.push({
-        start: match.index,
-        end: match.index + match[0].length,
+        start: boldMatch.index,
+        end: boldMatch.index + boldMatch[0].length,
         type: "bold",
-        content: match[1],
+        content: boldMatch[1],
       });
     }
   }
 
   // Find italic (*text*)
   while ((match = ITALIC_REGEX.exec(currentText)) !== null) {
+    const italicMatch = match; // TypeScript guard
     // Adjust for the leading character in the regex
-    const actualStart = match[0].startsWith('*') ? match.index : match.index + 1;
-    const actualEnd = actualStart + match[0].length - (match[0].startsWith('*') ? 0 : 1);
+    const actualStart = italicMatch[0].startsWith('*') ? italicMatch.index : italicMatch.index + 1;
+    const actualEnd = actualStart + italicMatch[0].length - (italicMatch[0].startsWith('*') ? 0 : 1);
     
     // Check if it's not already part of bold or bold-italic
     const isPartOfOther = markdownSegments.some(
@@ -125,7 +127,7 @@ function parseMarkdown(text: string): TextSegment[] {
         start: actualStart,
         end: actualEnd,
         type: "italic",
-        content: match[1],
+        content: italicMatch[1],
       });
     }
   }
