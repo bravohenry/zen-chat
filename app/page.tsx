@@ -25,19 +25,19 @@ const FOLLOW_UP_SUGGESTIONS: Record<string, string[]> = {
 const PRESET_RESPONSES: Record<string, string> = {
   "who are you?": "yo, i'm zihan. design engineer and ai builder based in the US. working on [biuty.ai](https://biuty.ai) and other things ✌️",
   "what do you do?": "design + strategy + ai systems. currently building [biuty.ai](https://biuty.ai) as coo. before that samsung, avatr, grabarz.",
-  "show me your projects": "check [/works](/works) – samsung design research, olig agency, skya are some highlights. also built [zios](https://os.bravohenry.com), a playful web os.",
+  "show me your projects": "check [z1han.com/works](https://z1han.com/works) – samsung design research, olig agency, skya are some highlights. also built [zios](https://os.bravohenry.com), a playful web os.",
   "your background?": "wenzhou china → germany → US. masters in design management. worked at samsung, avatr, grabarz & partner before going all-in on ai.",
   "design philosophy?": "less but better. every detail matters. design should feel inevitable, not decorated.",
-  "see your works": "[/works](/works) has everything. samsung design principles, olig agency, skya, '01 ipod tribute, the kyeol.",
+  "see your works": "[z1han.com/works](https://z1han.com/works) has everything. samsung design principles, olig agency, skya, '01 ipod tribute, the kyeol.",
   "tell me about samsung": "led design research there. worked on design principles and system thinking. still one of my proudest projects.",
   "what is olig agency?": "ai-native branding agency i helped build. we use ai for the entire brand creation process – strategy to execution.",
-  "your blogs?": "i write about ai, design, and building things. ai dlc, vibecoding playbook, ux in ai era. all on [/blog](/blog)",
+  "your blogs?": "i write about ai, design, and building things. ai dlc, vibecoding playbook, ux in ai era. all on [z1han.com/blog](https://z1han.com/blog)",
   "what is ai dlc?": "my framework for thinking about ai as downloadable content for your brain. augmentation, not replacement.",
   "vibecoding?": "coding by vibes. you describe what you want, ai writes the code. i wrote a whole playbook about it.",
   "how do you define yourself?": "ai-native builder. i think in systems and ship in weeks. design background but code is my new medium.",
   "contact info": "[x @bravohenry](https://x.com/bravohenry) or email [hi@z1han.com](mailto:hi@z1han.com). always down to chat about interesting projects.",
   "what are you working on?": "[biuty.ai](https://biuty.ai) mainly. also experimenting with [zios](https://os.bravohenry.com) and some ai tools. always building something.",
-  "recommend something": "go read my vibecoding playbook on [/blog](/blog) if you want to ship faster. or just vibe on [zios](https://os.bravohenry.com) for fun.",
+  "recommend something": "go read my vibecoding playbook on [z1han.com/blog](https://z1han.com/blog) if you want to ship faster. or just vibe on [zios](https://os.bravohenry.com) for fun.",
 };
 
 const RATE_LIMIT = {
