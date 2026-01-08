@@ -239,7 +239,7 @@ export default function ZenChat() {
     <div 
       className={cn(
         "flex min-h-screen items-center justify-center p-4 transition-colors duration-500",
-        isIntense && "bg-destructive/8"
+        isIntense && "bg-destructive text-white"
       )}
     >
       <div className="w-full max-w-md space-y-4">
@@ -249,15 +249,27 @@ export default function ZenChat() {
             showQuestion ? "max-h-[70vh] opacity-100" : "max-h-0 opacity-0"
           )}
         >
-          <p className="text-xs text-muted-foreground mb-3 transition-all duration-300">
+          <p className={cn(
+            "text-xs mb-3 transition-all duration-300",
+            isIntense ? "text-white/80" : "text-muted-foreground"
+          )}>
             {currentQuestion}
           </p>
           
           {isLoading && !lastAnswer ? (
             <div className="flex gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce [animation-delay:-0.3s]" />
-              <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce [animation-delay:-0.15s]" />
-              <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" />
+              <span className={cn(
+                "h-2 w-2 rounded-full animate-bounce [animation-delay:-0.3s]",
+                isIntense ? "bg-white/60" : "bg-primary/60"
+              )} />
+              <span className={cn(
+                "h-2 w-2 rounded-full animate-bounce [animation-delay:-0.15s]",
+                isIntense ? "bg-white/60" : "bg-primary/60"
+              )} />
+              <span className={cn(
+                "h-2 w-2 rounded-full animate-bounce",
+                isIntense ? "bg-white/60" : "bg-primary/60"
+              )} />
             </div>
           ) : (
             <StreamingText
@@ -278,12 +290,12 @@ export default function ZenChat() {
           autoFocus
           className={cn(
             "w-full border-0 bg-transparent px-0 py-2 text-sm",
-            "placeholder:text-muted-foreground/40",
             "focus:outline-none",
             "disabled:opacity-30",
             "transition-all duration-300",
-            "border-b border-border/50 focus:border-primary/60",
-            isIntense && "border-destructive/30"
+            isIntense 
+              ? "text-white placeholder:text-white/50 border-b border-white/30 focus:border-white/50"
+              : "placeholder:text-muted-foreground/40 border-b border-border/50 focus:border-primary/60"
           )}
         />
 
@@ -293,7 +305,12 @@ export default function ZenChat() {
               <button
                 key={s}
                 onClick={() => handleSuggestionClick(s)}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                className={cn(
+                  "text-xs transition-colors cursor-pointer",
+                  isIntense 
+                    ? "text-white/60 hover:text-white" 
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
                 {s}
               </button>
