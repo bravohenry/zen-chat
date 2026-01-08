@@ -211,7 +211,6 @@ export default function ZenChat() {
       setHistory([...newHistory, { role: "assistant", content: cleanedResponse }]);
       setQuestionCount((c) => c + 1);
       setPlaceholderIndex(prev => (prev + 1) % PLACEHOLDERS.length);
-      setIsIntense(false);
     } catch (error) {
       console.error("Chat error:", error);
       setLastAnswer("hmm, something went wrong. try again?");
