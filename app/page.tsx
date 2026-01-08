@@ -295,8 +295,8 @@ export default function ZenChat() {
             isIntense 
               ? "text-white placeholder:text-white border-b border-white/30 focus:border-white/50"
               : questionCount === 0
-                ? "text-white placeholder:text-white border-b border-border/50 focus:border-primary/60"
-                : "text-white placeholder:text-white/60 border-b border-border/50 focus:border-primary/60"
+                ? "text-white placeholder:text-white border-b border-white/30 focus:border-primary"
+                : "text-white placeholder:text-white/60 border-b border-white/30 focus:border-primary"
           )}
         />
 
@@ -310,7 +310,7 @@ export default function ZenChat() {
                   "text-xs transition-colors cursor-pointer",
                   isIntense 
                     ? "text-white/60 hover:text-white" 
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-primary hover:text-primary/80"
                 )}
               >
                 {s}
