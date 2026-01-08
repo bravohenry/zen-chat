@@ -99,11 +99,11 @@ export default function ZenChat() {
   };
 
   const processResponse = (text: string): string => {
-    if (text.startsWith("!!!!")) {
+    const trimmed = text.trimStart();
+    if (trimmed.startsWith("!!!!")) {
       setIsIntense(true);
-      return text.slice(4).trimStart();
+      return trimmed.slice(4).trimStart();
     }
-    setIsIntense(false);
     return text;
   };
 
@@ -211,6 +211,7 @@ export default function ZenChat() {
       setHistory([...newHistory, { role: "assistant", content: cleanedResponse }]);
       setQuestionCount((c) => c + 1);
       setPlaceholderIndex(prev => (prev + 1) % PLACEHOLDERS.length);
+      setIsIntense(false);
     } catch (error) {
       console.error("Chat error:", error);
       setLastAnswer("hmm, something went wrong. try again?");
