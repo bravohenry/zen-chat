@@ -142,7 +142,7 @@ export function StreamingText({ text, className, isIntense }: StreamingTextProps
     <motion.p
       className={cn(
         "text-sm leading-relaxed",
-        isIntense && "text-red-600",
+        isIntense && "text-red-400",
         className
       )}
       variants={containerVariants}
