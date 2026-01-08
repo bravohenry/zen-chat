@@ -118,7 +118,7 @@ export function StreamingText({ text, className, isIntense }: StreamingTextProps
           target={segment.href?.startsWith("mailto:") || segment.href?.startsWith("/") ? undefined : "_blank"}
           rel={segment.href?.startsWith("/") ? undefined : "noopener noreferrer"}
           variants={wordVariants}
-          className="inline-block underline underline-offset-2 hover:opacity-70 transition-opacity"
+          className="inline-block underline underline-offset-2 text-primary hover:text-primary/80 transition-colors"
           style={{ whiteSpace: "pre" }}
         >
           {segment.content}
@@ -142,7 +142,7 @@ export function StreamingText({ text, className, isIntense }: StreamingTextProps
     <motion.p
       className={cn(
         "text-sm leading-relaxed",
-        isIntense && "text-red-400",
+        isIntense && "text-destructive/90",
         className
       )}
       variants={containerVariants}

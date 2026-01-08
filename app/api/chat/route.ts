@@ -64,13 +64,33 @@ you: "!!!! lol get a life. you're talking to an ai on a chat widget 💀"
 </examples>
 `;
 
-const openrouter = createOpenAI({
+// Validate API key on module load
+if (!process.env.OPENROUTER_API_KEY) {
+  console.warn("⚠️  OPENROUTER_API_KEY is not set. API calls will fail.");
+}
+
+const openaiProvider = createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
+  headers: {
+    "HTTP-Referer": "https://z1han.com",
+    "X-Title": "Zihan Chat Widget",
+  },
 });
 
 export async function POST(req: Request) {
   try {
+    // Validate API key before processing
+    if (!process.env.OPENROUTER_API_KEY) {
+      return new Response(
+        JSON.stringify({ 
+          error: "API key not configured", 
+          message: "OPENROUTER_API_KEY environment variable is required" 
+        }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     const { messages } = await req.json();
 
     if (!messages || messages.length === 0) {
@@ -83,7 +103,7 @@ export async function POST(req: Request) {
     const systemPrompt = process.env.SYSTEM_PROMPT || ZIHAN_PERSONA;
 
     const result = streamText({
-      model: openrouter(process.env.OPENROUTER_MODEL || "google/gemma-3-27b-it:free"),
+      model: openaiProvider(process.env.OPENROUTER_MODEL || "google/gemma-3-27b-it:free"),
       system: systemPrompt,
       messages,
     });
@@ -97,6 +117,22 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Chat API error:", error);
     console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
+    
+    // Handle OpenRouter authentication errors specifically
+    if (error && typeof error === 'object' && 'statusCode' in error) {
+      const apiError = error as { statusCode?: number; data?: { error?: { message?: string } } };
+      if (apiError.statusCode === 401) {
+        return new Response(
+          JSON.stringify({ 
+            error: "Authentication failed", 
+            message: "Invalid or missing OpenRouter API key. Please check your OPENROUTER_API_KEY environment variable.",
+            details: apiError.data?.error?.message || "User not found"
+          }),
+          { status: 401, headers: { "Content-Type": "application/json" } }
+        );
+      }
+    }
+    
     return new Response(
       JSON.stringify({ error: "Internal server error", details: String(error) }),
       { status: 500, headers: { "Content-Type": "application/json" } }

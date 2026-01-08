@@ -198,10 +198,11 @@ export default function ZenChat() {
 
       console.log("Full response received:", fullResponse.length, "chars");
       console.log("Response content:", JSON.stringify(fullResponse.slice(0, 100)));
-
+      
       if (!fullResponse.trim()) {
-        console.error("Empty response after", chunkCount, "chunks");
-        throw new Error("Empty response");
+        console.warn("Empty response - likely model timeout or API issue");
+        setLastAnswer("hmm, nothing came back. try again?");
+        return;
       }
 
       const cleanedResponse = fullResponse.startsWith("!!!!") 
@@ -238,7 +239,7 @@ export default function ZenChat() {
     <div 
       className={cn(
         "flex min-h-screen items-center justify-center p-4 transition-colors duration-500",
-        isIntense && "bg-red-500/10"
+        isIntense && "bg-destructive/8"
       )}
     >
       <div className="w-full max-w-md space-y-4">
@@ -248,15 +249,15 @@ export default function ZenChat() {
             showQuestion ? "max-h-[70vh] opacity-100" : "max-h-0 opacity-0"
           )}
         >
-          <p className="text-xs text-foreground/40 mb-3 transition-all duration-300">
+          <p className="text-xs text-muted-foreground mb-3 transition-all duration-300">
             {currentQuestion}
           </p>
           
           {isLoading && !lastAnswer ? (
-            <div className="flex gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:-0.3s]" />
-              <span className="h-1.5 w-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:-0.15s]" />
-              <span className="h-1.5 w-1.5 rounded-full bg-foreground/40 animate-bounce" />
+            <div className="flex gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce [animation-delay:-0.3s]" />
+              <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce [animation-delay:-0.15s]" />
+              <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" />
             </div>
           ) : (
             <StreamingText
@@ -277,12 +278,12 @@ export default function ZenChat() {
           autoFocus
           className={cn(
             "w-full border-0 bg-transparent px-0 py-2 text-sm",
-            "placeholder:text-muted-foreground/30",
+            "placeholder:text-muted-foreground/40",
             "focus:outline-none",
             "disabled:opacity-30",
             "transition-all duration-300",
-            "border-b border-foreground/10 focus:border-foreground/20",
-            isIntense && "border-red-500/30"
+            "border-b border-border/50 focus:border-primary/60",
+            isIntense && "border-destructive/30"
           )}
         />
 
@@ -292,7 +293,7 @@ export default function ZenChat() {
               <button
                 key={s}
                 onClick={() => handleSuggestionClick(s)}
-                className="text-xs text-foreground/40 hover:text-foreground/70 transition-colors cursor-pointer"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
                 {s}
               </button>
