@@ -229,9 +229,7 @@ export function StreamingText({ text, className, isIntense }: StreamingTextProps
           variants={wordVariants}
           className={cn(
             "inline-block underline underline-offset-2 transition-colors",
-            isIntense 
-              ? "text-white/90 hover:text-white" 
-              : "text-primary hover:text-primary/80"
+            "text-white/90 hover:text-white"
           )}
           style={{ whiteSpace: "pre" }}
         >
@@ -294,8 +292,7 @@ export function StreamingText({ text, className, isIntense }: StreamingTextProps
   return (
     <motion.p
       className={cn(
-        "text-sm leading-relaxed",
-        isIntense && "text-white",
+        "text-sm leading-relaxed text-white",
         className
       )}
       variants={containerVariants}

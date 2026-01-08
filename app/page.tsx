@@ -294,8 +294,10 @@ export default function ZenChat() {
             "disabled:opacity-30",
             "transition-all duration-300",
             isIntense 
-              ? "text-white placeholder:text-white/50 border-b border-white/30 focus:border-white/50"
-              : "placeholder:text-muted-foreground/40 border-b border-border/50 focus:border-primary/60"
+              ? "text-white placeholder:text-white border-b border-white/30 focus:border-white/50"
+              : questionCount === 0
+                ? "placeholder:text-white border-b border-border/50 focus:border-primary/60"
+                : "placeholder:text-white/60 border-b border-border/50 focus:border-primary/60"
           )}
         />
 
