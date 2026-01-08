@@ -48,8 +48,8 @@
 
 :root {
   --radius: 0.625rem;
-  /* Base colors - warm neutral gray background */
-  --background: #A6A6A6;
+  /* Base colors - dark background slightly lighter than #232323 */
+  --background: #323232;
   --foreground: #2a2a2a;
   /* Card surfaces - slightly lighter for depth */
   --card: #B3B3B3;

@@ -238,7 +238,7 @@ export default function ZenChat() {
   return (
     <div 
       className={cn(
-        "flex min-h-screen items-center justify-center p-4 transition-colors duration-500",
+        "flex min-h-screen items-center justify-center p-4 transition-colors duration-500 bg-background",
         isIntense && "bg-destructive text-white"
       )}
     >
