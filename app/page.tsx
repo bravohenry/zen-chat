@@ -250,8 +250,7 @@ export default function ZenChat() {
           )}
         >
           <p className={cn(
-            "text-xs mb-3 transition-all duration-300",
-            isIntense ? "text-white/80" : "text-muted-foreground"
+            "text-xs mb-3 transition-all duration-300 text-white"
           )}>
             {currentQuestion}
           </p>
@@ -296,8 +295,8 @@ export default function ZenChat() {
             isIntense 
               ? "text-white placeholder:text-white border-b border-white/30 focus:border-white/50"
               : questionCount === 0
-                ? "placeholder:text-white border-b border-border/50 focus:border-primary/60"
-                : "placeholder:text-white/60 border-b border-border/50 focus:border-primary/60"
+                ? "text-white placeholder:text-white border-b border-border/50 focus:border-primary/60"
+                : "text-white placeholder:text-white/60 border-b border-border/50 focus:border-primary/60"
           )}
         />
 
