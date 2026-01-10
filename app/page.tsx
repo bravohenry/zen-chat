@@ -256,19 +256,17 @@ export default function ZenChat() {
           </p>
           
           {isLoading && !lastAnswer ? (
-            <div className="flex gap-1.5">
-              <span className={cn(
-                "h-2 w-2 rounded-full animate-bounce [animation-delay:-0.3s]",
-                isIntense ? "bg-white/60" : "bg-primary/60"
-              )} />
-              <span className={cn(
-                "h-2 w-2 rounded-full animate-bounce [animation-delay:-0.15s]",
-                isIntense ? "bg-white/60" : "bg-primary/60"
-              )} />
-              <span className={cn(
-                "h-2 w-2 rounded-full animate-bounce",
-                isIntense ? "bg-white/60" : "bg-primary/60"
-              )} />
+            <div className="flex gap-1 overflow-visible">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <span
+                  key={index}
+                  data-index={index}
+                  className={cn(
+                    "h-1.5 w-1.5 waveDouble",
+                    isIntense && "bg-white/60 shadow-[0_0_8px_rgba(255,255,255,0.35),0_0_16px_rgba(255,255,255,0.20)]"
+                  )}
+                />
+              ))}
             </div>
           ) : (
             <StreamingText
